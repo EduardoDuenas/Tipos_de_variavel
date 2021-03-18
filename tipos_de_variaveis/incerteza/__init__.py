@@ -4,11 +4,17 @@ from math import sqrt, pow
 class Incerteza:
     # inicialização
     def __init__(self, val=0.0, err=0.0):   # contem dois valores: valor e erro
-        self.val = abs(float(val))
+        self.val = float(val)
         self.err = abs(float(err))
 
     # definindo operador +
     def __add__(self, other):
+        if isinstance(other, self.__class__):
+            return Incerteza(self.val + other.val, sqrt(pow(self.err,2) + pow(other.err,2)))
+        elif isinstance(other, int) or isinstance(other, float):
+            return Incerteza(self.val + other, self.err)
+
+    def __radd__(self, other):
         if isinstance(other, self.__class__):
             return Incerteza(self.val + other.val, sqrt(pow(self.err,2) + pow(other.err,2)))
         elif isinstance(other, int) or isinstance(other, float):
@@ -21,15 +27,34 @@ class Incerteza:
         elif isinstance(other, int) or isinstance(other, float):
             return Incerteza(self.val - other, self.err)
 
+    def __rsub__(self, other):
+        if isinstance(other, self.__class__):
+            return Incerteza(-self.val + other.val, sqrt(pow(self.err,2) + pow(other.err,2)))
+        elif isinstance(other, int) or isinstance(other, float):
+            return Incerteza(-self.val + other, self.err)
+
     # definindo operador /
     def __truediv__(self, other):
         if isinstance(other, self.__class__):
             return Incerteza(self.val / other.val, sqrt(pow((self.err / self.val),2) + pow((other.err / other.val),2)))
         elif isinstance(other, int) or isinstance(other, float):
-            return Incerteza(self.val / other, self.err / abs(other))
+            return Incerteza(self.val / other, self.err / abs(self.val))
+
+    def __rtruediv__(self, other):
+        if isinstance(other, self.__class__):
+            return Incerteza(other.val / self.val,
+                             sqrt(pow((self.err / self.val), 2) + pow((other.err / other.val), 2)))
+        elif isinstance(other, int) or isinstance(other, float):
+            return Incerteza(other / self.val, self.err / abs(self.val))
 
     # definindo operador *
     def __mul__(self, other):
+        if isinstance(other, self.__class__):
+            return Incerteza(self.val * other.val, sqrt(pow((self.err / self.val), 2) + pow((other.err / other.val), 2)))
+        elif isinstance(other, int) or isinstance(other, float):
+            return Incerteza(self.val * other, self.err * abs(other))
+
+    def __rmul__(self, other):
         if isinstance(other, self.__class__):
             return Incerteza(self.val * other.val, sqrt(pow((self.err / self.val), 2) + pow((other.err / other.val), 2)))
         elif isinstance(other, int) or isinstance(other, float):
@@ -81,7 +106,13 @@ class Incerteza:
             else:
                 return False
         else:
-            return False
+            return True
+
+    def __neg__(self):
+        return Incerteza(-self.val,self.err)
+
+    def __abs__(self):
+        return Incerteza(abs(self.val),self.err)
 
     def __str__(self):
         return f'{self.val} ± {self.err}'
