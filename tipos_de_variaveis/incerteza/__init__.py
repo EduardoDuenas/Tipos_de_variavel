@@ -1,4 +1,4 @@
-from math import sqrt, pow, isclose
+from math import sqrt, pow
 
 
 class Incerteza:
@@ -88,15 +88,21 @@ class Incerteza:
 
     def isequal(self, other, val_err, err_err):
         '''
-        Essa função recebe três parametro e retornase de acordo com os valores passados os numeros são proximos o
-        suficiente:
-        :param other: um numero com incerteza
+        Essa função recebe três parametro e retorna se de acordo com os valores passados os números são proximos o
+        suficiente, tal que a diferença das grandezas seja menor que var_err e a diferença entre os erros seja menor
+        que err_err:
+        :param other: um número com ou sem incerteza
         :param val_err: margem de erro entre os valores
         :param err_err: margem de erro entre os erros
-        :return: True se proximos o suficiente ou False se não
+        :return: True se próximos o suficiente ou False se não
         '''
         if isinstance(other, self.__class__):
             if abs(self.val - other.val) <= abs(val_err) and abs(self.err - other.err) <= abs(err_err):
+                return True
+            else:
+                return False
+        elif isinstance(other, int) or isinstance(other, float):
+            if abs(self.val - other) <= abs(val_err) and abs(self.err) <= abs(err_err):
                 return True
             else:
                 return False
@@ -104,8 +110,16 @@ class Incerteza:
             return False
 
     def isclose(self, other, val_err):
+        '''
+        Essa função recebe dois parametro e retorna se de acordo com os valores passados os números são proximos o
+        suficiente, tal que a soma do maior valor com os erros seja maior que o menor valor mais o var_err:
+        :param other: um número com ou sem incerteza
+        :param val_err: máximo entre tolerada entre os valores
+        :return: True se proximo o suficiente ou False se não
+        '''
         if isinstance(other, self.__class__):
-            if (self.val + self.err + other.err <= other.val + val_err) or (self.val - self.err - other.err >= other.val - val_err):
+            if (self.val + self.err + other.err <= other.val + val_err) or \
+                    (self.val - self.err - other.err >= other.val - val_err):
                 return True
             else:
                 return False
